@@ -1,0 +1,5256 @@
+[
+    {
+        "id": "545a844242b98494",
+        "type": "tab",
+        "label": "IOT-Weather-System",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "c51d7ffd73036997",
+        "type": "http in",
+        "z": "545a844242b98494",
+        "name": "Weather-System Change City",
+        "url": "/weather-system/change",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 700,
+        "wires": [
+            [
+                "75943a2a23cb23bf",
+                "f6c7173d61889191"
+            ]
+        ]
+    },
+    {
+        "id": "0d8d85fc45558e0e",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 290,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "988df3214657de4c",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 1400,
+        "wires": []
+    },
+    {
+        "id": "2a94a940ac7c75b0",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Converter",
+        "func": "//Kelvin to Celc convert\nmsg.payload.main.temp = parseFloat((msg.payload.main.temp - 273.15).toFixed(2))\nmsg.payload.main.temp_min = parseFloat((msg.payload.main.temp_min - 273.15).toFixed(2))\nmsg.payload.main.temp_max = parseFloat((msg.payload.main.temp_max - 273.15).toFixed(2))\n\n//Cloud categories\nif(msg.payload.clouds.all < 11){\n    msg.payload.clouds.type = \"No Clouds\";\n}else if(msg.payload.clouds.all < 25){\n    msg.payload.clouds.type = \"Few Clouds\";\n}else if(msg.payload.clouds.all < 50){\n    msg.payload.clouds.type = \"Scattered Clouds\";\n}else if(msg.payload.clouds.all < 84){\n    msg.payload.clouds.type = \"Broken Clouds\";\n}else{\n    msg.payload.clouds.type = \"Overcast Clouds\";\n}\n\n//Weather Fix for HTML\nmsg.payload.icon = msg.payload.weather[0].icon\nmsg.payload.src = \"http://openweathermap.org/img/wn/\" + msg.payload.weather[0].icon + \"@2x.png\";\nmsg.payload.main.weather = msg.payload.weather[0].main;\nmsg.payload.main.weatherdesc = msg.payload.weather[0].description;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 1520,
+        "wires": [
+            [
+                "04d8f5d1b48d1ce7",
+                "8cf77ce6f6a340de",
+                "e22ed8a3a0d902f3"
+            ]
+        ],
+        "info": "Temperature, clouds, weather Converter\n\nRemoved the date converter"
+    },
+    {
+        "id": "83eb2f6df4cc523d",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "b1d6bd5a7bc61341",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "to CSV Format",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "{{payload.date}},{{payload.name}},{{payload.weather.0.main}},{{payload.weather.0.description}},{{payload.main.temp}},{{payload.main.temp_min}},{{payload.main.temp_max}},{{payload.main.humidity}},{{payload.visibility}},{{payload.wind.speed}},{{payload.clouds.all}}",
+        "output": "str",
+        "x": 4020,
+        "y": 620,
+        "wires": [
+            [
+                "4cf134a30aacfdab"
+            ]
+        ]
+    },
+    {
+        "id": "4cf134a30aacfdab",
+        "type": "file",
+        "z": "545a844242b98494",
+        "name": "Weather-Log Append",
+        "filename": "weather-log.csv",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 4100,
+        "y": 680,
+        "wires": [
+            [
+                "8ed1eeb05ff46668"
+            ]
+        ]
+    },
+    {
+        "id": "8ed1eeb05ff46668",
+        "type": "file in",
+        "z": "545a844242b98494",
+        "name": "Weather-Log Output",
+        "filename": "weather-log.csv",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 4170,
+        "y": 740,
+        "wires": [
+            [
+                "31af8f8209391a8f"
+            ]
+        ]
+    },
+    {
+        "id": "31af8f8209391a8f",
+        "type": "csv",
+        "z": "545a844242b98494",
+        "name": "",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "Waktu,Kota,Cuaca,Deskripsi,Temp,TempMin,TempMax,Humiditas,Visibilitas,Angin,Awan",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 4220,
+        "y": 800,
+        "wires": [
+            [
+                "65c801997330957f"
+            ]
+        ]
+    },
+    {
+        "id": "65c801997330957f",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 4370,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "2555e1e1f15c2abc",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1190,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "a135d04e0e10a71f",
+        "type": "http request",
+        "z": "545a844242b98494",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "api.openweathermap.org/data/2.5/weather?q={{payload}}&appid=60df8a2839717717d82aa5b4b39de627",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 280,
+        "y": 1460,
+        "wires": [
+            [
+                "988df3214657de4c",
+                "2a94a940ac7c75b0",
+                "f3452771dd9393f9"
+            ]
+        ]
+    },
+    {
+        "id": "ef0893f6dc5a5bf3",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "183baa338ae41e05",
+        "type": "file",
+        "z": "545a844242b98494",
+        "name": "",
+        "filename": "weather-log.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "delete",
+        "encoding": "none",
+        "x": 1220,
+        "y": 1080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cf8125f26baf1853",
+        "type": "inject",
+        "z": "545a844242b98494",
+        "name": "Delete",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 970,
+        "y": 1080,
+        "wires": [
+            [
+                "183baa338ae41e05",
+                "3eae75dfc7cdd422"
+            ]
+        ]
+    },
+    {
+        "id": "d4ea830eedba54a3",
+        "type": "trigger",
+        "z": "545a844242b98494",
+        "name": "",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "3",
+        "extend": true,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 480,
+        "y": 1220,
+        "wires": [
+            [
+                "ef0893f6dc5a5bf3",
+                "5ca0c3653eda713f",
+                "2cb89d65c5faba9a"
+            ]
+        ]
+    },
+    {
+        "id": "219cc54e16a2d70c",
+        "type": "mqtt in",
+        "z": "545a844242b98494",
+        "name": "",
+        "topic": "vr/weather-system/city-change",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "80666e2e2cac6810",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "x": 160,
+        "y": 1160,
+        "wires": [
+            [
+                "bdf73cc51ac688f3"
+            ]
+        ]
+    },
+    {
+        "id": "7edb0d97bfa2eeba",
+        "type": "mqtt out",
+        "z": "545a844242b98494",
+        "name": "",
+        "topic": "vr/weather-system/city-change",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "80666e2e2cac6810",
+        "x": 1030,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "5ca0c3653eda713f",
+        "type": "trigger",
+        "z": "545a844242b98494",
+        "name": "",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "10",
+        "extend": true,
+        "overrideDelay": true,
+        "units": "min",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 490,
+        "y": 1160,
+        "wires": [
+            [
+                "d4ea830eedba54a3"
+            ]
+        ]
+    },
+    {
+        "id": "8bc75228f63fda9b",
+        "type": "file",
+        "z": "545a844242b98494",
+        "name": "Display",
+        "filename": "display.html",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 4880,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9438e906526604e2",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "HTML maker",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>Current city is {{payload.kota}}</h1>\n        <!--- \n        <img src=\"\" alt=\"Cuaca\" id=\"icon\">\n        \n        <script>\n            url = \"D:/OneDrive - Universitas Prasetiya Mulya/CSE19/2021_1/CTI/icons/\" + {{payload.icon}} + \"@2x.png\"\n            //dec = unescape(url)\n            document.getElementById('icon').src = url);\n        </script>\n        --->\n        \n        <h3>Updated on <br>\n        {{payload.date}}<br>\n        Send again to update!</h3>\n        \n        <p>Current weather is {{payload.cuaca}} ({{payload.main.weatherdesc}})<br>\n        {{payload.temp}}<sup>o</sup>C ({{payload.temp_min}}<sup>o</sup>C ~ {{payload.temp_max}}<sup>o</sup>C)<br>\n        Humidity is {{payload.humiditas}}%<br>\n        Visibility is {{payload.visibilitas}}m<br>\n        Wind Speed is {{payload.angin}}m/s<br>\n        {{payload.tipeawan}}</p>\n        \n    </body>\n</html>",
+        "output": "str",
+        "x": 4770,
+        "y": 640,
+        "wires": [
+            [
+                "8bc75228f63fda9b",
+                "058969532ce23101"
+            ]
+        ]
+    },
+    {
+        "id": "733499d4a8bcd887",
+        "type": "file in",
+        "z": "545a844242b98494",
+        "name": "",
+        "filename": "display.html",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 4470,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "058969532ce23101",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 4870,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "ec78b9c102758497",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "0a3f549b7f80b167",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 940,
+        "y": 680,
+        "wires": [
+            [
+                "e606a9a9cddd3850"
+            ]
+        ]
+    },
+    {
+        "id": "15829c4b93b0ad84",
+        "type": "mqtt out",
+        "z": "545a844242b98494",
+        "name": "",
+        "topic": "vr/weather-system/log",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "80666e2e2cac6810",
+        "x": 4600,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "4896876cbbe9d6cb",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Insert City to DB",
+        "func": "\nmsg.topic = \"INSERT INTO t_city (id, name, lon, lat) VALUES ('\"+ msg.payload.id +\"', '\"+ msg.payload.name +\"', '\"+ msg.payload.coord.lon +\"', '\"+ msg.payload.coord.lat +\"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1980,
+        "y": 700,
+        "wires": [
+            [
+                "c61cbe74edebd439",
+                "28851fc91c10727a"
+            ]
+        ]
+    },
+    {
+        "id": "e762fd0932ad2334",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2150,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "c61cbe74edebd439",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 2030,
+        "y": 760,
+        "wires": [
+            [
+                "e762fd0932ad2334",
+                "bb612402c76dd479"
+            ]
+        ]
+    },
+    {
+        "id": "3f5a1f0aed1b4303",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Insert Stats",
+        "func": "\nvar msg1 = {topic : \"INSERT INTO `t_weather_realtime` (`waktu`, `idkota`, `cuaca`, `deskripsi`, `temp`, `tempmin`, `tempmax`, `humiditas`, `visibilitas`, `angin`, `awan`, `tipeawan`) VALUES ('\"+ msg.payload.dt +\"', '\"+ msg.payload.id +\"', '\"+ msg.payload.main.weather +\"', '\"+ msg.payload.main.weatherdesc +\"', '\"+ msg.payload.main.temp +\"', '\"+ msg.payload.main.temp_min +\"', '\"+ msg.payload.main.temp_max +\"', '\"+ msg.payload.main.humidity +\"', '\"+ msg.payload.visibility +\"', '\"+ msg.payload.wind.speed +\"', '\"+ msg.payload.clouds.all +\"', '\"+ msg.payload.clouds.type +\"');\"};\n\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1480,
+        "wires": [
+            [
+                "8d0974c5e450a7c1"
+            ]
+        ]
+    },
+    {
+        "id": "8d0974c5e450a7c1",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1010,
+        "y": 1440,
+        "wires": [
+            [
+                "382b5573991a29e6"
+            ]
+        ]
+    },
+    {
+        "id": "04d8f5d1b48d1ce7",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Delete Stats",
+        "func": "\nmsg.topic = \"DELETE FROM `t_weather_realtime` WHERE `t_weather_realtime`.`idkota` = \" + msg.payload.id ;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 1420,
+        "wires": [
+            [
+                "c2df99a9f71cffb1"
+            ]
+        ]
+    },
+    {
+        "id": "c2df99a9f71cffb1",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 750,
+        "y": 1360,
+        "wires": [
+            [
+                "83eb2f6df4cc523d"
+            ]
+        ]
+    },
+    {
+        "id": "8cf77ce6f6a340de",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 670,
+        "y": 1480,
+        "wires": [
+            [
+                "3f5a1f0aed1b4303",
+                "812fc83816275595"
+            ]
+        ]
+    },
+    {
+        "id": "e22ed8a3a0d902f3",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "10",
+        "timeoutUnits": "minutes",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 650,
+        "y": 1520,
+        "wires": [
+            [
+                "25f456b06657a818"
+            ]
+        ]
+    },
+    {
+        "id": "25f456b06657a818",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Insert History",
+        "func": "\nmsg.topic = \"INSERT INTO `t_weather_historical` (`waktu`, `idkota`, `cuaca`, `deskripsi`, `temp`, `tempmin`, `tempmax`, `humiditas`, `visibilitas`, `angin`, `awan`, `tipeawan`) VALUES ('\"+ msg.payload.dt +\"', '\"+ msg.payload.id +\"', '\"+ msg.payload.main.weather +\"', '\"+ msg.payload.main.weatherdesc +\"', '\"+ msg.payload.main.temp +\"', '\"+ msg.payload.main.temp_min +\"', '\"+ msg.payload.main.temp_max +\"', '\"+ msg.payload.main.humidity +\"', '\"+ msg.payload.visibility +\"', '\"+ msg.payload.wind.speed +\"', '\"+ msg.payload.clouds.all +\"', '\"+ msg.payload.clouds.type +\"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 850,
+        "y": 1520,
+        "wires": [
+            [
+                "779d4746f63a93b3"
+            ]
+        ]
+    },
+    {
+        "id": "779d4746f63a93b3",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1050,
+        "y": 1520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b27d4503d0cf0d24",
+        "type": "http in",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "Weather-System Update",
+        "url": "/weather-system/update",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 3510,
+        "y": 200,
+        "wires": [
+            [
+                "7633a5dc2e58b469"
+            ]
+        ]
+    },
+    {
+        "id": "2954225a775fef1b",
+        "type": "file in",
+        "z": "545a844242b98494",
+        "name": "",
+        "filename": "display.html",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 4200,
+        "y": 380,
+        "wires": [
+            [
+                "4173adfffc072758"
+            ]
+        ]
+    },
+    {
+        "id": "4173adfffc072758",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 4400,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "3eae75dfc7cdd422",
+        "type": "file",
+        "z": "545a844242b98494",
+        "name": "",
+        "filename": "display.html",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "delete",
+        "encoding": "none",
+        "x": 1260,
+        "y": 1120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3f24abdcfc378bda",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Func Get",
+        "func": "msg.topic = \"SELECT t_weather_realtime.*, t_city.name FROM t_weather_realtime INNER JOIN t_city ON idkota = id;\";\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 4460,
+        "y": 680,
+        "wires": [
+            [
+                "bdcbcbe8512cd6ed"
+            ]
+        ]
+    },
+    {
+        "id": "bdcbcbe8512cd6ed",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Get Datas",
+        "x": 4560,
+        "y": 720,
+        "wires": [
+            [
+                "577b9c5efec65dde",
+                "15829c4b93b0ad84"
+            ]
+        ]
+    },
+    {
+        "id": "97f886988355677c",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 4830,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "577b9c5efec65dde",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Converter",
+        "func": "var msg1 = { \n    payload: { \n        date: new Date(msg.payload[0].waktu*1000).toString(),\n        temp: msg.payload[0].temp,\n        temp_min: msg.payload[0].tempmin,\n        temp_max: msg.payload[0].tempmax,\n        tipeawan: msg.payload[0].tipeawan,\n        cuaca: msg.payload[0].cuaca,\n        desc: msg.payload[0].deskripsi,\n        humiditas: msg.payload[0].humiditas,\n        visibilitas: msg.payload[0].visibilitas,\n        angin: msg.payload[0].angin,\n        kota: msg.payload[0].name\n    }\n};\n\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 4640,
+        "y": 680,
+        "wires": [
+            [
+                "97f886988355677c",
+                "9438e906526604e2"
+            ]
+        ],
+        "info": "Timestamp and Temperature Converter"
+    },
+    {
+        "id": "16c2e3642416143a",
+        "type": "http in",
+        "z": "545a844242b98494",
+        "name": "Login",
+        "url": "/weather-system/login",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 90,
+        "y": 380,
+        "wires": [
+            [
+                "e33cd971b2fb0c19",
+                "e69c6d953b584a8f"
+            ]
+        ]
+    },
+    {
+        "id": "67fcb2b4b40ae758",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1020,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "e33cd971b2fb0c19",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Login Credentials",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user WHERE username='\" + msg.payload.username + \"' AND password='\" + msg.payload.password + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 420,
+        "wires": [
+            [
+                "1b2f55d3d1ef4433"
+            ]
+        ]
+    },
+    {
+        "id": "1b2f55d3d1ef4433",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 280,
+        "y": 460,
+        "wires": [
+            [
+                "a00e4c7f01d6b291"
+            ]
+        ]
+    },
+    {
+        "id": "178f0aa37486a121",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Token Generation",
+        "func": "function randomString(length, chars) {\n    var result = '';\n    for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];\n    return result;\n}\n\ndelete msg.payload.password;\ndelete msg.topic;\n\nvar charList = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';\n\ntoken = randomString(16, charList);\nmsg.payload.token = token\nmsg.topic = \"INSERT INTO `t_user_token` (`id`, `username`, `token`, `ts_expired`) VALUES (NULL, '\" + msg.payload.username + \"', '\" + token + \"', DATE_ADD(NOW(), INTERVAL 15 MINUTE));\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 520,
+        "wires": [
+            [
+                "f20f9f8a540a4644",
+                "67fcb2b4b40ae758"
+            ]
+        ]
+    },
+    {
+        "id": "040832d394c6f101",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Exist or Not",
+        "func": "var newMsg = { payload: {\n    \"user_exist\": msg.payload[\"EXISTS(SELECT * FROM t_user WHERE username='\" + msg.payload.username + \"' AND password='\" + msg.payload.password + \"')\"],\n    \"username\": msg.payload.username\n} }\n\nnewMsg.req = msg.req;\nnewMsg.res = msg.res\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 420,
+        "wires": [
+            [
+                "1ca32951ca3cf58a",
+                "859e83cda04cf1c5",
+                "b90fee98dd7a9d60"
+            ]
+        ]
+    },
+    {
+        "id": "f20f9f8a540a4644",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 860,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d3f7604377388fbc",
+        "type": "inject",
+        "z": "545a844242b98494",
+        "name": "Truncate Tokens",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "TRUNCATE  t_user_token",
+        "x": 1000,
+        "y": 1180,
+        "wires": [
+            [
+                "8783795e6022a050"
+            ]
+        ]
+    },
+    {
+        "id": "8783795e6022a050",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1200,
+        "y": 1180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a00e4c7f01d6b291",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 360,
+        "y": 500,
+        "wires": [
+            [
+                "e69c6d953b584a8f"
+            ]
+        ]
+    },
+    {
+        "id": "e69c6d953b584a8f",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "1",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 460,
+        "y": 380,
+        "wires": [
+            [
+                "040832d394c6f101"
+            ]
+        ]
+    },
+    {
+        "id": "75943a2a23cb23bf",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Token",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.req.query.token + \"' AND ts_expired>NOW());\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 270,
+        "y": 740,
+        "wires": [
+            [
+                "469e33e6a6c09398"
+            ]
+        ]
+    },
+    {
+        "id": "469e33e6a6c09398",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 370,
+        "y": 780,
+        "wires": [
+            [
+                "eed8e29b3221f6d3"
+            ]
+        ]
+    },
+    {
+        "id": "eed8e29b3221f6d3",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 450,
+        "y": 820,
+        "wires": [
+            [
+                "f6c7173d61889191"
+            ]
+        ]
+    },
+    {
+        "id": "f6c7173d61889191",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "1",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 590,
+        "y": 700,
+        "wires": [
+            [
+                "f8ad8dcadf4869d4",
+                "1ba7719de76a7fc6"
+            ]
+        ]
+    },
+    {
+        "id": "f8ad8dcadf4869d4",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Valid Token or Not",
+        "func": "var newMsg = { payload: {\n    \"valid_token\": msg.payload[\"EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.req.query.token + \"' AND ts_expired>NOW())\"],\n    \"kota1\": msg.payload.kota1,\n    \"kota2\": msg.payload.kota2\n} }\n\nnewMsg.req = msg.req;\nnewMsg.res = msg.res;\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 740,
+        "wires": [
+            [
+                "ca08271784a88fab"
+            ]
+        ]
+    },
+    {
+        "id": "35c58bd0b4be8c1f",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "GetWeatherAPI",
+        "links": [
+            "ceedb63c141b1b75"
+        ],
+        "x": 135,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ceedb63c141b1b75",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "GetWeatherTokenValidation",
+        "links": [
+            "35c58bd0b4be8c1f"
+        ],
+        "x": 75,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "2d06a575ed481839",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.city_exist",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1870,
+        "y": 640,
+        "wires": [
+            [
+                "076f3801080463d0"
+            ],
+            [
+                "4896876cbbe9d6cb"
+            ]
+        ]
+    },
+    {
+        "id": "626ec18fd6cc87a7",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check City Already in DB or Not",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_city WHERE id='\" + msg.payload.id + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1390,
+        "y": 600,
+        "wires": [
+            [
+                "a0f8e0bc9a8e1fef"
+            ]
+        ]
+    },
+    {
+        "id": "a0f8e0bc9a8e1fef",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1490,
+        "y": 640,
+        "wires": [
+            [
+                "8cd8d74c98d49bd8"
+            ]
+        ]
+    },
+    {
+        "id": "8cd8d74c98d49bd8",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1570,
+        "y": 680,
+        "wires": [
+            [
+                "001f99e462b6c81c"
+            ]
+        ]
+    },
+    {
+        "id": "f3452771dd9393f9",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "APIResponse",
+        "links": [
+            "e2f92088c4e9dc30"
+        ],
+        "x": 435,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "e2f92088c4e9dc30",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "InsertCity",
+        "links": [
+            "f3452771dd9393f9",
+            "fdff496ba62526e8"
+        ],
+        "x": 1235,
+        "y": 560,
+        "wires": [
+            [
+                "626ec18fd6cc87a7",
+                "001f99e462b6c81c"
+            ]
+        ]
+    },
+    {
+        "id": "001f99e462b6c81c",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "1",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1650,
+        "y": 560,
+        "wires": [
+            [
+                "b98a0301cf0dd149"
+            ]
+        ]
+    },
+    {
+        "id": "28851fc91c10727a",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2170,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "b98a0301cf0dd149",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Exist or Not",
+        "func": "delete msg.topic;\n\nmsg.payload.city_exist = msg.payload[\"EXISTS(SELECT * FROM t_city WHERE id='\" + msg.payload.id + \"')\"];\ndelete msg.payload[\"EXISTS(SELECT * FROM t_city WHERE id='\" + msg.payload.id + \"')\"];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1780,
+        "y": 600,
+        "wires": [
+            [
+                "2d06a575ed481839"
+            ]
+        ]
+    },
+    {
+        "id": "5532d2ae4bb64095",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 3780,
+        "y": 320,
+        "wires": [
+            [
+                "53e926c64c7b28ec"
+            ]
+        ]
+    },
+    {
+        "id": "c81ff72506decdd6",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 3700,
+        "y": 280,
+        "wires": [
+            [
+                "5532d2ae4bb64095"
+            ]
+        ]
+    },
+    {
+        "id": "7633a5dc2e58b469",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Token",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.req.query.token + \"' AND ts_expired>NOW());\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3600,
+        "y": 240,
+        "wires": [
+            [
+                "c81ff72506decdd6"
+            ]
+        ]
+    },
+    {
+        "id": "53e926c64c7b28ec",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Valid Token or Not",
+        "func": "var newMsg = { payload: {\n    \"valid_token\": msg.payload[\"EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.req.query.token + \"')\"]\n} }\n\nnewMsg.req = msg.req;\nnewMsg.res = msg.res\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3910,
+        "y": 360,
+        "wires": [
+            [
+                "a76f0a9964ed3492"
+            ]
+        ]
+    },
+    {
+        "id": "a76f0a9964ed3492",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.valid_token",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 4040,
+        "y": 400,
+        "wires": [
+            [
+                "2954225a775fef1b",
+                "e36750444270864e"
+            ],
+            [
+                "df3b90e595c70003"
+            ]
+        ]
+    },
+    {
+        "id": "1ca32951ca3cf58a",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.user_exist",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 660,
+        "y": 460,
+        "wires": [
+            [
+                "f34ab1dbdaf83cd6"
+            ],
+            [
+                "178f0aa37486a121"
+            ]
+        ]
+    },
+    {
+        "id": "f34ab1dbdaf83cd6",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "No User Exist",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Username of Password is Invalid!",
+        "output": "str",
+        "x": 850,
+        "y": 460,
+        "wires": [
+            [
+                "67fcb2b4b40ae758"
+            ]
+        ]
+    },
+    {
+        "id": "501ece3ee99b46ab",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "TokenExpired",
+        "links": [
+            "a1002b062695ae7a"
+        ],
+        "x": 915,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "df3b90e595c70003",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "TokenExpired",
+        "links": [
+            "a1002b062695ae7a"
+        ],
+        "x": 4145,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "a1002b062695ae7a",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "TokenExpiredNotif",
+        "links": [
+            "501ece3ee99b46ab",
+            "df3b90e595c70003"
+        ],
+        "x": 1235,
+        "y": 820,
+        "wires": [
+            [
+                "94c441f934a0bf36"
+            ]
+        ]
+    },
+    {
+        "id": "94c441f934a0bf36",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "Token Expired",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Your Session Has Expired!",
+        "output": "str",
+        "x": 1360,
+        "y": 820,
+        "wires": [
+            [
+                "9bc48f0181bf696a"
+            ]
+        ]
+    },
+    {
+        "id": "9bc48f0181bf696a",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1510,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "155043251ce9e29d",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "UpdateToken",
+        "links": [
+            "e36750444270864e",
+            "f48b0ba5825cc50d"
+        ],
+        "x": 1235,
+        "y": 860,
+        "wires": [
+            [
+                "d78580a9f48f9337",
+                "98fb5267f5285ce1"
+            ]
+        ]
+    },
+    {
+        "id": "d78580a9f48f9337",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Update Token",
+        "func": "\nmsg.topic = \"UPDATE t_user_token SET ts_expired = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE token='\" + msg.req.query.token + \"';\";\nglobal.set(\"token\",msg.req.query.token);\nglobal.set(\"user\",msg.req.query.user);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 860,
+        "wires": [
+            [
+                "a1f8717fce788dc6"
+            ]
+        ]
+    },
+    {
+        "id": "a1f8717fce788dc6",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1690,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f48b0ba5825cc50d",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "UpdateToken",
+        "links": [
+            "155043251ce9e29d"
+        ],
+        "x": 915,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "e36750444270864e",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "UpdateToken",
+        "links": [
+            "155043251ce9e29d"
+        ],
+        "x": 4145,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "a8d0e359d29fc4e5",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Log Access",
+        "func": "var q = JSON.stringify(msg.req.query);\nvar b = JSON.stringify(msg.req.body);\n\nmsg.topic = \"INSERT INTO `t_access_log` (`access_log_id`, `access_date`, `username`, `method`, `endpoint`, `req_params`, `req_body`) VALUES (NULL, DATE_ADD(NOW(), INTERVAL 0 SECOND), '\" + msg.req.query.user + \"', '\" + msg.req.method + \"', '\" + msg.req.originalUrl +\"', '\" + q + \"', '\" + b + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1510,
+        "y": 900,
+        "wires": [
+            [
+                "a1f8717fce788dc6"
+            ]
+        ]
+    },
+    {
+        "id": "98fb5267f5285ce1",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "500",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 1350,
+        "y": 900,
+        "wires": [
+            [
+                "a8d0e359d29fc4e5"
+            ]
+        ]
+    },
+    {
+        "id": "79903564b0517576",
+        "type": "http in",
+        "z": "545a844242b98494",
+        "name": "Register",
+        "url": "/weather-system/register",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 100,
+        "y": 120,
+        "wires": [
+            [
+                "4c2c0f33a5a534a4",
+                "9e071a8b8bdb38b8",
+                "c3f7e1fca6adadcc"
+            ]
+        ]
+    },
+    {
+        "id": "4c2c0f33a5a534a4",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 170,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "9e071a8b8bdb38b8",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "Check Password",
+        "property": "payload.password",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "payload.confirmPassword",
+                "vt": "msg"
+            },
+            {
+                "t": "eq",
+                "v": "payload.confirmPassword",
+                "vt": "msg"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 210,
+        "y": 160,
+        "wires": [
+            [
+                "6bab7c081d14d3cc"
+            ],
+            [
+                "c7362dbc18438148"
+            ]
+        ]
+    },
+    {
+        "id": "c7362dbc18438148",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Username Exist or Not",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user WHERE username='\" + msg.payload.username + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "bb202f0f3d921881"
+            ]
+        ]
+    },
+    {
+        "id": "bb202f0f3d921881",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 370,
+        "y": 240,
+        "wires": [
+            [
+                "73fdef8fa7b30a6a"
+            ]
+        ]
+    },
+    {
+        "id": "73fdef8fa7b30a6a",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 450,
+        "y": 280,
+        "wires": [
+            [
+                "c3f7e1fca6adadcc"
+            ]
+        ]
+    },
+    {
+        "id": "c3f7e1fca6adadcc",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "4",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 990,
+        "y": 120,
+        "wires": [
+            [
+                "d201e444293ba999"
+            ]
+        ]
+    },
+    {
+        "id": "d201e444293ba999",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Exist or Not",
+        "func": "var newMsg = { payload: {\n    \"user_exist\": msg.payload[\"EXISTS(SELECT * FROM t_user WHERE username='\" + msg.payload.username + \"')\"],\n    \"username\": msg.payload.username,\n    \"password\": msg.payload.password\n} }\n\nnewMsg.req = msg.req;\nnewMsg.res = msg.res\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1080,
+        "y": 160,
+        "wires": [
+            [
+                "242adc56eb0ed41b",
+                "25053f8f1c565a01"
+            ]
+        ]
+    },
+    {
+        "id": "ca08271784a88fab",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.valid_token",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 810,
+        "y": 780,
+        "wires": [
+            [
+                "f48b0ba5825cc50d",
+                "7edb0d97bfa2eeba",
+                "0a3f549b7f80b167"
+            ],
+            [
+                "501ece3ee99b46ab"
+            ]
+        ]
+    },
+    {
+        "id": "242adc56eb0ed41b",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.user_exist",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1170,
+        "y": 200,
+        "wires": [
+            [
+                "9ac9d20c0da9e353"
+            ],
+            [
+                "6018480ae064132d"
+            ]
+        ]
+    },
+    {
+        "id": "e673da188362379d",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1330,
+        "y": 280,
+        "wires": [
+            [
+                "ca7469f51c423722"
+            ]
+        ]
+    },
+    {
+        "id": "6018480ae064132d",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Register New User",
+        "func": "\nmsg.topic = \"INSERT INTO `t_user` (`username`, `password`) VALUES ('\" + msg.payload.username + \"', '\" + msg.payload.password + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1250,
+        "y": 240,
+        "wires": [
+            [
+                "e673da188362379d"
+            ]
+        ]
+    },
+    {
+        "id": "6bab7c081d14d3cc",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "Password Not Match",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Password does not match!",
+        "output": "str",
+        "x": 540,
+        "y": 160,
+        "wires": [
+            [
+                "bf0e1cbcb40b3645"
+            ]
+        ]
+    },
+    {
+        "id": "bf0e1cbcb40b3645",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 610,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "9ac9d20c0da9e353",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "Username Exists",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Username already exists!",
+        "output": "str",
+        "x": 1370,
+        "y": 160,
+        "wires": [
+            [
+                "f659bff378a86b9d"
+            ]
+        ]
+    },
+    {
+        "id": "f659bff378a86b9d",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1470,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "ca7469f51c423722",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "Register Success",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Successfully Registered! Go to the Login Page to login!",
+        "output": "str",
+        "x": 1450,
+        "y": 320,
+        "wires": [
+            [
+                "6f8cec358ad47217"
+            ]
+        ]
+    },
+    {
+        "id": "6f8cec358ad47217",
+        "type": "http response",
+        "z": "545a844242b98494",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 1550,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "25053f8f1c565a01",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1360,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "859e83cda04cf1c5",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "1ba7719de76a7fc6",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "7d1b63cf31efb1a1",
+        "type": "change",
+        "z": "545a844242b98494",
+        "name": "Get City Name",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.kota",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 4130,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "824e4e6f7d00f12f",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "JOIN FUNC REMINDER",
+        "info": "PERLU GANTI SUBSEQUENT MSG KALO TAMBAH ATO KURANGIN ITEM DI PAYLOAD",
+        "x": 770,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "e606a9a9cddd3850",
+        "type": "template",
+        "z": "545a844242b98494",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "City Changed\nCheck http://localhost:1880/ui/#!/1?socketid=EW881kWGUdYlM6jwAABv",
+        "output": "str",
+        "x": 1040,
+        "y": 720,
+        "wires": [
+            [
+                "2555e1e1f15c2abc",
+                "ec78b9c102758497"
+            ]
+        ]
+    },
+    {
+        "id": "a5e5f8c2dd59b31f",
+        "type": "http request",
+        "z": "545a844242b98494",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "api.openweathermap.org/data/2.5/weather?q={{payload}}&appid=60df8a2839717717d82aa5b4b39de627",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 290,
+        "y": 1700,
+        "wires": [
+            [
+                "3655e3d24ece5fed",
+                "8ce2bb0fdf59bb8e",
+                "fdff496ba62526e8"
+            ]
+        ]
+    },
+    {
+        "id": "3655e3d24ece5fed",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 460,
+        "y": 1640,
+        "wires": []
+    },
+    {
+        "id": "8ce2bb0fdf59bb8e",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Converter",
+        "func": "//Kelvin to Celc convert\nmsg.payload.main.temp = parseFloat((msg.payload.main.temp - 273.15).toFixed(2))\nmsg.payload.main.temp_min = parseFloat((msg.payload.main.temp_min - 273.15).toFixed(2))\nmsg.payload.main.temp_max = parseFloat((msg.payload.main.temp_max - 273.15).toFixed(2))\n\n//Cloud categories\nif(msg.payload.clouds.all < 11){\n    msg.payload.clouds.type = \"No Clouds\";\n}else if(msg.payload.clouds.all < 25){\n    msg.payload.clouds.type = \"Few Clouds\";\n}else if(msg.payload.clouds.all < 50){\n    msg.payload.clouds.type = \"Scattered Clouds\";\n}else if(msg.payload.clouds.all < 84){\n    msg.payload.clouds.type = \"Broken Clouds\";\n}else{\n    msg.payload.clouds.type = \"Overcast Clouds\";\n}\n\n//Weather Fix for HTML\nmsg.payload.icon = msg.payload.weather[0].icon\nmsg.payload.src = \"http://openweathermap.org/img/wn/\" + msg.payload.weather[0].icon + \"@2x.png\";\nmsg.payload.main.weather = msg.payload.weather[0].main;\nmsg.payload.main.weatherdesc = msg.payload.weather[0].description;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 1760,
+        "wires": [
+            [
+                "146a44d72c42840a",
+                "5c983a216744356c",
+                "c323ef9992754731"
+            ]
+        ],
+        "info": "Temperature, clouds, weather Converter\n\nRemoved the date converter"
+    },
+    {
+        "id": "fdff496ba62526e8",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "APIResponse",
+        "links": [
+            "e2f92088c4e9dc30"
+        ],
+        "x": 445,
+        "y": 1700,
+        "wires": []
+    },
+    {
+        "id": "c323ef9992754731",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Delete Stats",
+        "func": "\nmsg.topic = \"DELETE FROM `t_weather_realtime` WHERE `t_weather_realtime`.`idkota` = \" + msg.payload.id ;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 1660,
+        "wires": [
+            [
+                "cf79370460f69f22"
+            ]
+        ]
+    },
+    {
+        "id": "146a44d72c42840a",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 680,
+        "y": 1720,
+        "wires": [
+            [
+                "c2a31586e1103d46",
+                "e04b41dbaec4c3ac"
+            ]
+        ]
+    },
+    {
+        "id": "5c983a216744356c",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "10",
+        "timeoutUnits": "minutes",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 660,
+        "y": 1760,
+        "wires": [
+            [
+                "10ada22bd70bfb8e"
+            ]
+        ]
+    },
+    {
+        "id": "cf79370460f69f22",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 760,
+        "y": 1600,
+        "wires": [
+            [
+                "4a74218d22f12819"
+            ]
+        ]
+    },
+    {
+        "id": "c2a31586e1103d46",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Insert Stats",
+        "func": "\nvar msg1 = {topic : \"INSERT INTO `t_weather_realtime` (`waktu`, `idkota`, `cuaca`, `deskripsi`, `temp`, `tempmin`, `tempmax`, `humiditas`, `visibilitas`, `angin`, `awan`, `tipeawan`) VALUES ('\"+ msg.payload.dt +\"', '\"+ msg.payload.id +\"', '\"+ msg.payload.main.weather +\"', '\"+ msg.payload.main.weatherdesc +\"', '\"+ msg.payload.main.temp +\"', '\"+ msg.payload.main.temp_min +\"', '\"+ msg.payload.main.temp_max +\"', '\"+ msg.payload.main.humidity +\"', '\"+ msg.payload.visibility +\"', '\"+ msg.payload.wind.speed +\"', '\"+ msg.payload.clouds.all +\"', '\"+ msg.payload.clouds.type +\"');\"};\n\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 1720,
+        "wires": [
+            [
+                "0a76a4bb4911fea9"
+            ]
+        ]
+    },
+    {
+        "id": "10ada22bd70bfb8e",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Insert History",
+        "func": "\nmsg.topic = \"INSERT INTO `t_weather_historical` (`waktu`, `idkota`, `cuaca`, `deskripsi`, `temp`, `tempmin`, `tempmax`, `humiditas`, `visibilitas`, `angin`, `awan`, `tipeawan`) VALUES ('\"+ msg.payload.dt +\"', '\"+ msg.payload.id +\"', '\"+ msg.payload.main.weather +\"', '\"+ msg.payload.main.weatherdesc +\"', '\"+ msg.payload.main.temp +\"', '\"+ msg.payload.main.temp_min +\"', '\"+ msg.payload.main.temp_max +\"', '\"+ msg.payload.main.humidity +\"', '\"+ msg.payload.visibility +\"', '\"+ msg.payload.wind.speed +\"', '\"+ msg.payload.clouds.all +\"', '\"+ msg.payload.clouds.type +\"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 1760,
+        "wires": [
+            [
+                "c6377c1e365c2035"
+            ]
+        ]
+    },
+    {
+        "id": "4a74218d22f12819",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "0a76a4bb4911fea9",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1020,
+        "y": 1680,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c6377c1e365c2035",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1060,
+        "y": 1760,
+        "wires": [
+            [
+                "f83427524cfed598"
+            ]
+        ]
+    },
+    {
+        "id": "4473e0d6060c933a",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "KOTA1",
+        "info": "",
+        "x": 130,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "391790847afda289",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "KOTA2",
+        "info": "",
+        "x": 130,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "b92171f8ebd7567a",
+        "type": "trigger",
+        "z": "545a844242b98494",
+        "name": "",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "1",
+        "extend": true,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 480,
+        "y": 1120,
+        "wires": [
+            [
+                "ef5eeea80199fac2",
+                "50d31dd5a59cac3d",
+                "95b74208597aba5f"
+            ]
+        ]
+    },
+    {
+        "id": "50d31dd5a59cac3d",
+        "type": "trigger",
+        "z": "545a844242b98494",
+        "name": "",
+        "op1": "",
+        "op2": "",
+        "op1type": "nul",
+        "op2type": "payl",
+        "duration": "10",
+        "extend": true,
+        "overrideDelay": true,
+        "units": "min",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 490,
+        "y": 1060,
+        "wires": [
+            [
+                "b92171f8ebd7567a"
+            ]
+        ]
+    },
+    {
+        "id": "ef5eeea80199fac2",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "bdf73cc51ac688f3",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var kota1 = { payload : msg.payload.kota1 }\nvar kota2 = { payload : msg.payload.kota2 }\nreturn [kota1,kota2];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 1220,
+        "wires": [
+            [
+                "b92171f8ebd7567a"
+            ],
+            [
+                "d4ea830eedba54a3",
+                "0d8d85fc45558e0e"
+            ]
+        ]
+    },
+    {
+        "id": "2cb89d65c5faba9a",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Kota2",
+        "links": [
+            "721b663068340826"
+        ],
+        "x": 615,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "95b74208597aba5f",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Kota1",
+        "links": [
+            "df7a9a471af5b7cc"
+        ],
+        "x": 615,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "df7a9a471af5b7cc",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Kota1",
+        "links": [
+            "95b74208597aba5f"
+        ],
+        "x": 105,
+        "y": 1460,
+        "wires": [
+            [
+                "a135d04e0e10a71f"
+            ]
+        ]
+    },
+    {
+        "id": "721b663068340826",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Kota2",
+        "links": [
+            "2cb89d65c5faba9a"
+        ],
+        "x": 115,
+        "y": 1700,
+        "wires": [
+            [
+                "a5e5f8c2dd59b31f"
+            ]
+        ]
+    },
+    {
+        "id": "457981edb5c02bdd",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "NOT USED",
+        "info": "",
+        "x": 3430,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "382b5573991a29e6",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1240,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "f83427524cfed598",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1250,
+        "y": 1760,
+        "wires": []
+    },
+    {
+        "id": "ad0a435041c74825",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "CITY DUPE CHECKER DB",
+        "info": "",
+        "x": 1300,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "db1f8c3646741e7b",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "TOKEN VALIDATION",
+        "info": "",
+        "x": 1290,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "6d260c901e022455",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "SEND CITIES TO MONITOR",
+        "info": "",
+        "x": 160,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "f46eccaee7946c5a",
+        "type": "ui_dropdown",
+        "z": "545a844242b98494",
+        "name": "",
+        "label": "Kota",
+        "tooltip": "",
+        "place": "Pilih kota...",
+        "group": "5f8399b2250daea4",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 210,
+        "y": 1960,
+        "wires": [
+            [
+                "c25261ea3b7112f4"
+            ]
+        ]
+    },
+    {
+        "id": "d4c2606b0053980a",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1690,
+        "y": 1980,
+        "wires": []
+    },
+    {
+        "id": "fec6f5b9fad0115c",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Get History DB",
+        "func": "\nmsg.topic = \"SELECT * FROM t_weather_historical INNER JOIN t_city ON t_weather_historical.idkota=t_city.id WHERE idkota=\" + msg.payload.idkota + \" ORDER BY t_weather_historical.waktu DESC LIMIT 10;\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 1960,
+        "wires": [
+            [
+                "3015f86257bb61c8",
+                "809d3636bac27f7e",
+                "d4c2606b0053980a"
+            ]
+        ]
+    },
+    {
+        "id": "c2232f29d2e0e4fc",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1770,
+        "y": 1880,
+        "wires": []
+    },
+    {
+        "id": "3015f86257bb61c8",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Access DB",
+        "x": 1710,
+        "y": 2020,
+        "wires": [
+            [
+                "c2232f29d2e0e4fc",
+                "eed6cde73f4dd86f",
+                "0a6973483ecccba8",
+                "13e2e93601eefc63",
+                "406773ef14a5c9b9",
+                "ea710ba6b65e9536",
+                "89145ba65879ceba",
+                "f815a56ef7781592"
+            ]
+        ]
+    },
+    {
+        "id": "2bf662efb5cddaed",
+        "type": "ui_button",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "5f8399b2250daea4",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Confirm",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "token",
+        "payloadType": "global",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 500,
+        "y": 1960,
+        "wires": [
+            [
+                "d47d09455e4b38dc"
+            ]
+        ]
+    },
+    {
+        "id": "809d3636bac27f7e",
+        "type": "ui_button",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "5f8399b2250daea4",
+        "order": 6,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Refresh",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "token",
+        "payloadType": "global",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1360,
+        "y": 1900,
+        "wires": [
+            [
+                "a39c42572764fb80"
+            ]
+        ]
+    },
+    {
+        "id": "c25261ea3b7112f4",
+        "type": "change",
+        "z": "545a844242b98494",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 350,
+        "y": 1960,
+        "wires": [
+            [
+                "2bf662efb5cddaed"
+            ]
+        ]
+    },
+    {
+        "id": "a96472054afb18e6",
+        "type": "ui_chart",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "a054d1876a49dae5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Temp. (C)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2200,
+        "y": 1880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "eed6cde73f4dd86f",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Temp",
+        "func": "data = [\n    [],\n    [],\n    []\n    ];\n\n/*\nfor (let i = 0; i < msg.payload.length; i++){\n    data.push({\n        \"x\" : msg.payload[i].waktu*1000,\n        \"y\" : msg.payload[i].temp\n        });\n    }\n}\n*/\n/*\nfor(let i = 0; i < msg.payload.length; i++ ) {\n  data.push( [] );\n}\n*/\n\nfor(let i = 0; i < msg.payload.length; i++){\n    for(let j = 0; j < 3; j++){\n        if(j == 0){\n            data[j].push({\n                \"x\" : msg.payload[i].waktu*1000,\n                \"y\" : msg.payload[i].temp\n            });\n        }\n        else if(j == 1){\n            data[j].push({\n                \"x\" : msg.payload[i].waktu*1000,\n                \"y\" : msg.payload[i].tempmin\n            });\n        }\n        else if(j == 2){\n            data[j].push({\n                \"x\" : msg.payload[i].waktu*1000,\n                \"y\" : msg.payload[i].tempmax\n            });\n        }\n    }\n}\n\n\nmsg.payload = [{\n\"series\": [\"Temp\", \"Temp Min\", \"Temp Max\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1950,
+        "y": 1880,
+        "wires": [
+            [
+                "c6b831529939394d"
+            ]
+        ]
+    },
+    {
+        "id": "c6b831529939394d",
+        "type": "change",
+        "z": "545a844242b98494",
+        "name": "Fix",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload[0].data",
+                "pt": "msg",
+                "to": "payload[0].data[0]",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2070,
+        "y": 1880,
+        "wires": [
+            [
+                "a96472054afb18e6"
+            ]
+        ]
+    },
+    {
+        "id": "985dbb30a6d79ec5",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "5f8399b2250daea4",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "name": "DASHBOARD",
+        "label": "",
+        "format": "",
+        "layout": "row-spread",
+        "className": "",
+        "x": 160,
+        "y": 1860,
+        "wires": []
+    },
+    {
+        "id": "0a6973483ecccba8",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Humiditas",
+        "func": "data = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    data.push({\n        \"x\" : msg.payload[i].waktu*1000,\n        \"y\" : msg.payload[i].humiditas\n    });\n}\n\nmsg.payload = [{\n\"series\": [\"Humiditas\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1960,
+        "y": 1920,
+        "wires": [
+            [
+                "e66c1163692b759a"
+            ]
+        ]
+    },
+    {
+        "id": "e66c1163692b759a",
+        "type": "ui_chart",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "a054d1876a49dae5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Humiditas",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2120,
+        "y": 1920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "13e2e93601eefc63",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Visibilitas",
+        "func": "data = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    data.push({\n        \"x\" : msg.payload[i].waktu*1000,\n        \"y\" : msg.payload[i].visibilitas\n    });\n}\n\n\nmsg.payload = [{\n\"series\": [\"Visibilitas\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1960,
+        "y": 1960,
+        "wires": [
+            [
+                "cfe465be7b844af2"
+            ]
+        ]
+    },
+    {
+        "id": "cfe465be7b844af2",
+        "type": "ui_chart",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "a054d1876a49dae5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Visibilitas (m)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2130,
+        "y": 1960,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fe2ec324a50584a9",
+        "type": "ui_chart",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "be2e36a4d31be2a2",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Laju Angin (m/s)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2140,
+        "y": 2000,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "406773ef14a5c9b9",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Laju Angin",
+        "func": "data = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    data.push({\n        \"x\" : msg.payload[i].waktu*1000,\n        \"y\" : msg.payload[i].angin\n    });\n}\n\nmsg.payload = [{\n\"series\": [\"Laju Angin\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1970,
+        "y": 2000,
+        "wires": [
+            [
+                "fe2ec324a50584a9"
+            ]
+        ]
+    },
+    {
+        "id": "8ef664280dbedcbd",
+        "type": "ui_chart",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "be2e36a4d31be2a2",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "label": "Awan di Langit (%)",
+        "chartType": "line",
+        "legend": "true",
+        "xformat": "dd HH:mm",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "1",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2150,
+        "y": 2040,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ea710ba6b65e9536",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Berawan",
+        "func": "data = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    data.push({\n        \"x\" : msg.payload[i].waktu*1000,\n        \"y\" : msg.payload[i].awan\n    });\n}\n\nmsg.payload = [{\n\"series\": [\"Awan di Langit\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1960,
+        "y": 2040,
+        "wires": [
+            [
+                "8ef664280dbedcbd"
+            ]
+        ]
+    },
+    {
+        "id": "cebbcb30a975b9f1",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "5f8399b2250daea4",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Dari",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 2150,
+        "y": 2100,
+        "wires": []
+    },
+    {
+        "id": "89145ba65879ceba",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu Awal",
+        "func": "start = new Date(msg.payload[9].waktu*1000).toLocaleString();\n\nvar newMsg = {payload : start}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1990,
+        "y": 2100,
+        "wires": [
+            [
+                "cebbcb30a975b9f1"
+            ]
+        ]
+    },
+    {
+        "id": "f815a56ef7781592",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu Akhir",
+        "func": "end = new Date(msg.payload[0].waktu*1000).toLocaleString();\n\nvar newMsg = {payload : end }\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1990,
+        "y": 2140,
+        "wires": [
+            [
+                "ec91963a53e84bc9"
+            ]
+        ]
+    },
+    {
+        "id": "ec91963a53e84bc9",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "5f8399b2250daea4",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Sampai",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 2160,
+        "y": 2140,
+        "wires": []
+    },
+    {
+        "id": "dce28569c10f71e3",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 910,
+        "y": 2080,
+        "wires": [
+            [
+                "8d2fe5929f8ebaf7"
+            ]
+        ]
+    },
+    {
+        "id": "cf4611f72d8f494b",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 830,
+        "y": 2040,
+        "wires": [
+            [
+                "dce28569c10f71e3"
+            ]
+        ]
+    },
+    {
+        "id": "8fe6ab10df2c5835",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Token",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.payload.token + \"' AND ts_expired>NOW());\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 2000,
+        "wires": [
+            [
+                "cf4611f72d8f494b"
+            ]
+        ]
+    },
+    {
+        "id": "6f6b68ea22dbff1f",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 930,
+        "y": 1880,
+        "wires": []
+    },
+    {
+        "id": "8d2fe5929f8ebaf7",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = { payload : msg.payload };\nnewMsg.event = msg.event;\nnewMsg.socketid = msg.socketid;\nnewMsg.parts = msg.parts;\nnewMsg._msgid = msg._msgid;\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1000,
+        "y": 2120,
+        "wires": [
+            [
+                "114104664ec6c058"
+            ]
+        ]
+    },
+    {
+        "id": "114104664ec6c058",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "1",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1010,
+        "y": 1960,
+        "wires": [
+            [
+                "0210b5feb84ac5de"
+            ]
+        ]
+    },
+    {
+        "id": "d47d09455e4b38dc",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = {payload: {\n    \"token\": msg.payload }\n}\n\nnewMsg.topic = msg.topic;\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 1960,
+        "wires": [
+            [
+                "8fe6ab10df2c5835",
+                "114104664ec6c058"
+            ]
+        ]
+    },
+    {
+        "id": "0210b5feb84ac5de",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Valid Token or Not",
+        "func": "var newMsg = { payload: {\n    \"valid_token\": msg.payload[\"EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.payload.token + \"' AND ts_expired>NOW())\"],\n    \"idkota\": msg.topic,\n    \"token\": msg.payload.token\n} }\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1140,
+        "y": 2000,
+        "wires": [
+            [
+                "304c4f5b0fab60e1",
+                "6f6b68ea22dbff1f"
+            ]
+        ]
+    },
+    {
+        "id": "304c4f5b0fab60e1",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.valid_token",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1250,
+        "y": 2040,
+        "wires": [
+            [
+                "fec6f5b9fad0115c",
+                "c2d64a5e337f14ba"
+            ],
+            [
+                "6ee5bd52a1f23bbb",
+                "f91ac5a6859e5218",
+                "cf5761f939d583ef",
+                "90ae8efc6a996da7",
+                "c3e5ecb4c3fce78a",
+                "4e2e4b5a3d851f75",
+                "bac5064a9c1df8db",
+                "96365fbe8a93d989"
+            ]
+        ]
+    },
+    {
+        "id": "3262f37bb010d386",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Refresh",
+        "links": [
+            "569569730255c033"
+        ],
+        "x": 1555,
+        "y": 2020,
+        "wires": [
+            [
+                "3015f86257bb61c8"
+            ]
+        ]
+    },
+    {
+        "id": "a39c42572764fb80",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = {payload: {\n    \"token\": msg.payload }\n}\n\nnewMsg.topic = msg.topic;\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1543.0000534057617,
+        "y": 1625.0001068115234,
+        "wires": [
+            [
+                "8b3e60a6b95d39db",
+                "2a08a35e0ae5bee4"
+            ]
+        ]
+    },
+    {
+        "id": "8b3e60a6b95d39db",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Check Token",
+        "func": "\nmsg.topic = \"SELECT EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.payload.token + \"' AND ts_expired>NOW());\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1623.0000534057617,
+        "y": 1665.0001068115234,
+        "wires": [
+            [
+                "eba53d4476d605a9"
+            ]
+        ]
+    },
+    {
+        "id": "eba53d4476d605a9",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1723.0000534057617,
+        "y": 1705.0001068115234,
+        "wires": [
+            [
+                "b410fe2f77267a87"
+            ]
+        ]
+    },
+    {
+        "id": "b410fe2f77267a87",
+        "type": "split",
+        "z": "545a844242b98494",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1803.0000534057617,
+        "y": 1745.0001068115234,
+        "wires": [
+            [
+                "469a09502854ba01"
+            ]
+        ]
+    },
+    {
+        "id": "469a09502854ba01",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = { payload : msg.payload };\nnewMsg.event = msg.event;\nnewMsg.socketid = msg.socketid;\nnewMsg.parts = msg.parts;\nnewMsg._msgid = msg._msgid;\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1893.0000534057617,
+        "y": 1785.0001068115234,
+        "wires": [
+            [
+                "2a08a35e0ae5bee4"
+            ]
+        ]
+    },
+    {
+        "id": "2a08a35e0ae5bee4",
+        "type": "join",
+        "z": "545a844242b98494",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "1",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1903.0000534057617,
+        "y": 1625.0001068115234,
+        "wires": [
+            [
+                "9e863084e1a6856b"
+            ]
+        ]
+    },
+    {
+        "id": "9e863084e1a6856b",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Send Out Valid Token or Not",
+        "func": "var newMsg = { payload: {\n    \"valid_token\": msg.payload[\"EXISTS(SELECT * FROM t_user_token WHERE token='\" + msg.payload.token + \"' AND ts_expired>NOW())\"]\n} }\n\nnewMsg.topic = msg.topic\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2033.0000534057617,
+        "y": 1665.0001068115234,
+        "wires": [
+            [
+                "ca3cb078163baa3d"
+            ]
+        ]
+    },
+    {
+        "id": "ca3cb078163baa3d",
+        "type": "switch",
+        "z": "545a844242b98494",
+        "name": "",
+        "property": "payload.valid_token",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 2143.0000534057617,
+        "y": 1705.0001068115234,
+        "wires": [
+            [
+                "569569730255c033",
+                "4843aaa263444055"
+            ],
+            [
+                "1a1d57b3d2052f56"
+            ]
+        ]
+    },
+    {
+        "id": "569569730255c033",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Refresh",
+        "links": [
+            "3262f37bb010d386"
+        ],
+        "x": 2255,
+        "y": 1680,
+        "wires": []
+    },
+    {
+        "id": "4843aaa263444055",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2270,
+        "y": 1600,
+        "wires": []
+    },
+    {
+        "id": "6ee5bd52a1f23bbb",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Temp",
+        "func": "data = [];\n\nmsg.payload = [{\n\"series\": [],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1430,
+        "y": 2160,
+        "wires": [
+            [
+                "a96472054afb18e6"
+            ]
+        ]
+    },
+    {
+        "id": "f91ac5a6859e5218",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Humiditas",
+        "func": "data = [];\n\nmsg.payload = [{\n\"series\": [\"Humiditas\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1440,
+        "y": 2200,
+        "wires": [
+            [
+                "e66c1163692b759a"
+            ]
+        ]
+    },
+    {
+        "id": "cf5761f939d583ef",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Visibilitas",
+        "func": "data = [];\n\nmsg.payload = [{\n\"series\": [\"Visibilitas\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1440,
+        "y": 2240,
+        "wires": [
+            [
+                "cfe465be7b844af2"
+            ]
+        ]
+    },
+    {
+        "id": "90ae8efc6a996da7",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Laju Angin",
+        "func": "data = [];\n\nmsg.payload = [{\n\"series\": [\"Laju Angin\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1450,
+        "y": 2280,
+        "wires": [
+            [
+                "fe2ec324a50584a9"
+            ]
+        ]
+    },
+    {
+        "id": "c3e5ecb4c3fce78a",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Berawan",
+        "func": "data = [];\n\nmsg.payload = [{\n\"series\": [\"Awan di Langit\"],\n\"data\": [\n    data\n],\n\"labels\": [\"\"]\n}]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1440,
+        "y": 2320,
+        "wires": [
+            [
+                "8ef664280dbedcbd"
+            ]
+        ]
+    },
+    {
+        "id": "4e2e4b5a3d851f75",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu Awal",
+        "func": "var newMsg = {payload : \"\"}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 2380,
+        "wires": [
+            [
+                "cebbcb30a975b9f1"
+            ]
+        ]
+    },
+    {
+        "id": "bac5064a9c1df8db",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu Akhir",
+        "func": "var newMsg = {payload : \"\"}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 2420,
+        "wires": [
+            [
+                "ec91963a53e84bc9"
+            ]
+        ]
+    },
+    {
+        "id": "c2d64a5e337f14ba",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Dashboard Token Update",
+        "links": [
+            "5fe696dbd3ad3540"
+        ],
+        "x": 1395,
+        "y": 2040,
+        "wires": []
+    },
+    {
+        "id": "5fe696dbd3ad3540",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "UpdateToken Dashboard",
+        "links": [
+            "c2d64a5e337f14ba"
+        ],
+        "x": 1235,
+        "y": 940,
+        "wires": [
+            [
+                "b12b77e37d1a9c69",
+                "fd57a901562e310d"
+            ]
+        ]
+    },
+    {
+        "id": "b12b77e37d1a9c69",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Update Token",
+        "func": "\nmsg.topic = \"UPDATE t_user_token SET ts_expired = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE token='\" + msg.payload.token + \"';\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 940,
+        "wires": [
+            [
+                "abd18231fbf818ee"
+            ]
+        ]
+    },
+    {
+        "id": "abd18231fbf818ee",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Input to DB",
+        "x": 1690,
+        "y": 940,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7f8af2896ed890c6",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Log Access",
+        "func": "var tempUser = global.get(\"user\");\n\nvar q = '{\"token\":\"' + msg.payload.token + '\",\"user\":\"' + tempUser + '\"}';\nvar b = '{\"idkota\":\"' + msg.payload.idkota + '\"}';\n\nmsg.topic = \"INSERT INTO `t_access_log` (`access_log_id`, `access_date`, `username`, `method`, `endpoint`, `req_params`, `req_body`) VALUES (NULL, DATE_ADD(NOW(), INTERVAL 0 SECOND), '\" + tempUser + \"', 'GET', '/weather-system/historical?token=\" + msg.payload.token + \"&user=\" + tempUser + \"', '\" + q + \"', '\" + b + \"');\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1510,
+        "y": 980,
+        "wires": [
+            [
+                "abd18231fbf818ee",
+                "c145814c827fdf67"
+            ]
+        ]
+    },
+    {
+        "id": "fd57a901562e310d",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "500",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 1350,
+        "y": 980,
+        "wires": [
+            [
+                "7f8af2896ed890c6"
+            ]
+        ]
+    },
+    {
+        "id": "c145814c827fdf67",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1720,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "55091f458262bc06",
+        "type": "ui_toast",
+        "z": "545a844242b98494",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 1870,
+        "y": 1500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9763c540eb1ce936",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "msg.payload = \"Your Session Has Expired. Please Log In Again!\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1700,
+        "y": 1500,
+        "wires": [
+            [
+                "55091f458262bc06"
+            ]
+        ]
+    },
+    {
+        "id": "96365fbe8a93d989",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Dashboard Expired",
+        "links": [
+            "d36442014c437afe"
+        ],
+        "x": 1395,
+        "y": 2080,
+        "wires": []
+    },
+    {
+        "id": "1a1d57b3d2052f56",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Dashboard Expired",
+        "links": [
+            "d36442014c437afe"
+        ],
+        "x": 2255,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "d36442014c437afe",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Dashboard Expired",
+        "links": [
+            "1a1d57b3d2052f56",
+            "96365fbe8a93d989"
+        ],
+        "x": 1575,
+        "y": 1500,
+        "wires": [
+            [
+                "9763c540eb1ce936"
+            ]
+        ]
+    },
+    {
+        "id": "8efc9128a488d445",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "TOKEN EXPIRED IN DASHBOARD",
+        "info": "",
+        "x": 1630,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "25c4107e42d79b89",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "HISTORICAL",
+        "info": "",
+        "x": 220,
+        "y": 1920,
+        "wires": []
+    },
+    {
+        "id": "812fc83816275595",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Kota1Dashboard",
+        "links": [
+            "f63f5ca7eca97bef"
+        ],
+        "x": 835,
+        "y": 1420,
+        "wires": []
+    },
+    {
+        "id": "e04b41dbaec4c3ac",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "Kota2Dashboard",
+        "links": [
+            "65bee04f833a2651"
+        ],
+        "x": 835,
+        "y": 1660,
+        "wires": []
+    },
+    {
+        "id": "f63f5ca7eca97bef",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Kota1Dashboard",
+        "links": [
+            "812fc83816275595"
+        ],
+        "x": 175,
+        "y": 2200,
+        "wires": [
+            [
+                "1df127765f57e637"
+            ]
+        ]
+    },
+    {
+        "id": "de802ad42eaf4e69",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = {topic: \"SELECT * FROM t_weather_realtime INNER JOIN t_city ON t_weather_realtime.idkota=t_city.id WHERE t_weather_realtime.idkota=\" + msg.payload.id + \";\"};\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 2200,
+        "wires": [
+            [
+                "4a132a0df7ecf9d4"
+            ]
+        ]
+    },
+    {
+        "id": "1df127765f57e637",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 290,
+        "y": 2200,
+        "wires": [
+            [
+                "de802ad42eaf4e69"
+            ]
+        ]
+    },
+    {
+        "id": "bb52cc07264ce5d3",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 2160,
+        "wires": []
+    },
+    {
+        "id": "4a132a0df7ecf9d4",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Access DB",
+        "x": 650,
+        "y": 2200,
+        "wires": [
+            [
+                "15fbe87e2d3fd883"
+            ]
+        ]
+    },
+    {
+        "id": "d95a33131dafe719",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "30353b6cdaa16b64",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temp. (C)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "-20",
+        "max": "60",
+        "colors": [
+            "#39c3fe",
+            "#00c70d",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1160,
+        "y": 2320,
+        "wires": []
+    },
+    {
+        "id": "06202652597d0e0c",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "30353b6cdaa16b64",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Humiditas",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1160,
+        "y": 2360,
+        "wires": []
+    },
+    {
+        "id": "0ff0ffd2bdaf8a31",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "30353b6cdaa16b64",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Visibilitas (m)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "10000",
+        "colors": [
+            "#000000",
+            "#9e9e9e",
+            "#ebebeb"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1170,
+        "y": 2400,
+        "wires": []
+    },
+    {
+        "id": "a531a7c781d932eb",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "30353b6cdaa16b64",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Laju Angin (m/s)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#006eff",
+            "#00b803",
+            "#c20000"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1180,
+        "y": 2440,
+        "wires": []
+    },
+    {
+        "id": "09ad533ea545e773",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "30353b6cdaa16b64",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Awan di Langit (%)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b30c",
+            "#e6e600",
+            "#cb3a3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1190,
+        "y": 2480,
+        "wires": []
+    },
+    {
+        "id": "7f4b0660047fab5c",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "30353b6cdaa16b64",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Kota",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1150,
+        "y": 2200,
+        "wires": []
+    },
+    {
+        "id": "34a8ca27069a2644",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "30353b6cdaa16b64",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Waktu",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1150,
+        "y": 2240,
+        "wires": []
+    },
+    {
+        "id": "4c79e57a94ad8f81",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Kota",
+        "func": "msg.payload = msg.payload.kota\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2200,
+        "wires": [
+            [
+                "7f4b0660047fab5c"
+            ]
+        ]
+    },
+    {
+        "id": "15fbe87e2d3fd883",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Converter",
+        "func": "var msg1 = { \n    payload: { \n        date: msg.payload[0].waktu,\n        temp: msg.payload[0].temp,\n        tipeawan: msg.payload[0].tipeawan,\n        cuaca: msg.payload[0].cuaca,\n        desc: msg.payload[0].deskripsi,\n        humiditas: msg.payload[0].humiditas,\n        visibilitas: msg.payload[0].visibilitas,\n        angin: msg.payload[0].angin,\n        awan: msg.payload[0].awan,\n        kota: msg.payload[0].name\n    }\n};\n\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 2240,
+        "wires": [
+            [
+                "bb52cc07264ce5d3",
+                "4c79e57a94ad8f81",
+                "c7fc531242a4ce93",
+                "1b22087ed322305e",
+                "ee39bbb021e140e3",
+                "405d710299e1c624",
+                "c843c97f9b0ae674",
+                "995228c4bab3c65f",
+                "deb63c73fe5ab229"
+            ]
+        ],
+        "info": "Timestamp and Temperature Converter"
+    },
+    {
+        "id": "efe4b454bad79d4b",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "30353b6cdaa16b64",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "Kondisi Cuaca",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1180,
+        "y": 2280,
+        "wires": []
+    },
+    {
+        "id": "c7fc531242a4ce93",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu",
+        "func": "start = new Date(msg.payload.date*1000).toLocaleString();\n\nvar newMsg = {payload : start}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2240,
+        "wires": [
+            [
+                "34a8ca27069a2644"
+            ]
+        ]
+    },
+    {
+        "id": "1b22087ed322305e",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Kondisi Cuaca",
+        "func": "cuaca = msg.payload.cuaca + \" (\" + msg.payload.desc + \")\";\n\nvar newMsg = {payload : cuaca}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 2280,
+        "wires": [
+            [
+                "efe4b454bad79d4b"
+            ]
+        ]
+    },
+    {
+        "id": "ee39bbb021e140e3",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Temp",
+        "func": "msg.payload = msg.payload.temp\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2320,
+        "wires": [
+            [
+                "d95a33131dafe719"
+            ]
+        ]
+    },
+    {
+        "id": "405d710299e1c624",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Humiditas",
+        "func": "msg.payload = msg.payload.humiditas\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 2360,
+        "wires": [
+            [
+                "06202652597d0e0c"
+            ]
+        ]
+    },
+    {
+        "id": "c843c97f9b0ae674",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Visibilitas",
+        "func": "msg.payload = msg.payload.visibilitas\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 2400,
+        "wires": [
+            [
+                "0ff0ffd2bdaf8a31"
+            ]
+        ]
+    },
+    {
+        "id": "995228c4bab3c65f",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Laju Angin",
+        "func": "msg.payload = msg.payload.angin\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 2440,
+        "wires": [
+            [
+                "a531a7c781d932eb"
+            ]
+        ]
+    },
+    {
+        "id": "deb63c73fe5ab229",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Awan di Langit",
+        "func": "msg.payload = msg.payload.awan\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 2480,
+        "wires": [
+            [
+                "09ad533ea545e773"
+            ]
+        ]
+    },
+    {
+        "id": "619b12a1993d0a68",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "KOTA1",
+        "info": "",
+        "x": 190,
+        "y": 2160,
+        "wires": []
+    },
+    {
+        "id": "dd740bc038d4b4c7",
+        "type": "comment",
+        "z": "545a844242b98494",
+        "name": "KOTA2",
+        "info": "",
+        "x": 190,
+        "y": 2560,
+        "wires": []
+    },
+    {
+        "id": "1a63487ca97f8942",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Temp",
+        "func": "msg.payload = msg.payload.temp\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2720,
+        "wires": [
+            [
+                "8a551ebcc97fd368"
+            ]
+        ]
+    },
+    {
+        "id": "a7ff8150f927d1a9",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Converter",
+        "func": "var msg1 = { \n    payload: { \n        date: msg.payload[0].waktu,\n        temp: msg.payload[0].temp,\n        tipeawan: msg.payload[0].tipeawan,\n        cuaca: msg.payload[0].cuaca,\n        desc: msg.payload[0].deskripsi,\n        humiditas: msg.payload[0].humiditas,\n        visibilitas: msg.payload[0].visibilitas,\n        angin: msg.payload[0].angin,\n        awan: msg.payload[0].awan,\n        kota: msg.payload[0].name\n    }\n};\n\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 2640,
+        "wires": [
+            [
+                "7c4fe1188fe71abd",
+                "346b1925481370a9",
+                "fe727ed7a24e6687",
+                "5ad5d357cd15deea",
+                "1a63487ca97f8942",
+                "ec2c3aefd08213f8",
+                "392404381b2c2e8a",
+                "838abf121084575c",
+                "78666d688c4121f1"
+            ]
+        ],
+        "info": "Timestamp and Temperature Converter"
+    },
+    {
+        "id": "8a551ebcc97fd368",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "4f77a9187b268839",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Temp. (C)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "-20",
+        "max": "60",
+        "colors": [
+            "#39c3fe",
+            "#00c70d",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1160,
+        "y": 2720,
+        "wires": []
+    },
+    {
+        "id": "9d04abc02f84c66b",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Access DB",
+        "x": 650,
+        "y": 2600,
+        "wires": [
+            [
+                "a7ff8150f927d1a9"
+            ]
+        ]
+    },
+    {
+        "id": "7c4fe1188fe71abd",
+        "type": "debug",
+        "z": "545a844242b98494",
+        "d": true,
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 2560,
+        "wires": []
+    },
+    {
+        "id": "346b1925481370a9",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Kota",
+        "func": "msg.payload = msg.payload.kota\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2600,
+        "wires": [
+            [
+                "84154a4f03f2c9a0"
+            ]
+        ]
+    },
+    {
+        "id": "fe727ed7a24e6687",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Waktu",
+        "func": "start = new Date(msg.payload.date*1000).toLocaleString();\n\nvar newMsg = {payload : start}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 2640,
+        "wires": [
+            [
+                "b5c75ea936a21ede"
+            ]
+        ]
+    },
+    {
+        "id": "5ad5d357cd15deea",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Kondisi Cuaca",
+        "func": "cuaca = msg.payload.cuaca + \" (\" + msg.payload.desc + \")\";\n\nvar newMsg = {payload : cuaca}\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 2680,
+        "wires": [
+            [
+                "f95ba2e9b9d3e865"
+            ]
+        ]
+    },
+    {
+        "id": "ec2c3aefd08213f8",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Humiditas",
+        "func": "msg.payload = msg.payload.humiditas\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 2760,
+        "wires": [
+            [
+                "bfd23cd464f27bc2"
+            ]
+        ]
+    },
+    {
+        "id": "392404381b2c2e8a",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Visibilitas",
+        "func": "msg.payload = msg.payload.visibilitas\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 2800,
+        "wires": [
+            [
+                "bc72e1df652b983f"
+            ]
+        ]
+    },
+    {
+        "id": "838abf121084575c",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Laju Angin",
+        "func": "msg.payload = msg.payload.angin\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 2840,
+        "wires": [
+            [
+                "be4eca0579cf1c9b"
+            ]
+        ]
+    },
+    {
+        "id": "78666d688c4121f1",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Awan di Langit",
+        "func": "msg.payload = msg.payload.awan\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 960,
+        "y": 2880,
+        "wires": [
+            [
+                "55574d5f5c81d778"
+            ]
+        ]
+    },
+    {
+        "id": "d2e081da8e8fea6a",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "",
+        "func": "var newMsg = {topic: \"SELECT * FROM t_weather_realtime INNER JOIN t_city ON t_weather_realtime.idkota=t_city.id WHERE t_weather_realtime.idkota=\" + msg.payload.id + \";\"};\n\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 2600,
+        "wires": [
+            [
+                "9d04abc02f84c66b"
+            ]
+        ]
+    },
+    {
+        "id": "84154a4f03f2c9a0",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "4f77a9187b268839",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Kota",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1150,
+        "y": 2600,
+        "wires": []
+    },
+    {
+        "id": "b5c75ea936a21ede",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "4f77a9187b268839",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Waktu",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1150,
+        "y": 2640,
+        "wires": []
+    },
+    {
+        "id": "f95ba2e9b9d3e865",
+        "type": "ui_text",
+        "z": "545a844242b98494",
+        "group": "4f77a9187b268839",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "Kondisi Cuaca",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-left",
+        "className": "",
+        "x": 1180,
+        "y": 2680,
+        "wires": []
+    },
+    {
+        "id": "bfd23cd464f27bc2",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "4f77a9187b268839",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Humiditas",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1160,
+        "y": 2760,
+        "wires": []
+    },
+    {
+        "id": "bc72e1df652b983f",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "4f77a9187b268839",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Visibilitas (m)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "10000",
+        "colors": [
+            "#000000",
+            "#9e9e9e",
+            "#ebebeb"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1170,
+        "y": 2800,
+        "wires": []
+    },
+    {
+        "id": "be4eca0579cf1c9b",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "4f77a9187b268839",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Laju Angin (m/s)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": 10,
+        "colors": [
+            "#006eff",
+            "#00b803",
+            "#c20000"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1180,
+        "y": 2840,
+        "wires": []
+    },
+    {
+        "id": "55574d5f5c81d778",
+        "type": "ui_gauge",
+        "z": "545a844242b98494",
+        "name": "",
+        "group": "4f77a9187b268839",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Awan di Langit (%)",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3acb52"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1190,
+        "y": 2880,
+        "wires": []
+    },
+    {
+        "id": "c75dd1225c6c92e0",
+        "type": "delay",
+        "z": "545a844242b98494",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "x": 290,
+        "y": 2600,
+        "wires": [
+            [
+                "d2e081da8e8fea6a"
+            ]
+        ]
+    },
+    {
+        "id": "65bee04f833a2651",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "Kota2Dashboard",
+        "links": [
+            "e04b41dbaec4c3ac"
+        ],
+        "x": 175,
+        "y": 2600,
+        "wires": [
+            [
+                "c75dd1225c6c92e0"
+            ]
+        ]
+    },
+    {
+        "id": "fcb119c24e270edb",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Populate Dropdown",
+        "func": "options = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    nama = msg.payload[i].name;\n    id = msg.payload[i].id;\n    \n    options.push({\n        [nama] : id\n    });\n}\n\nmsg.options = options\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2560,
+        "y": 760,
+        "wires": [
+            [
+                "628cb44b89e65663"
+            ]
+        ]
+    },
+    {
+        "id": "bb612402c76dd479",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "All Cities",
+        "func": "msg.topic = \"SELECT id, name FROM t_city;\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2220,
+        "y": 760,
+        "wires": [
+            [
+                "b780d3d6184bf40b"
+            ]
+        ]
+    },
+    {
+        "id": "b780d3d6184bf40b",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Access DB",
+        "x": 2380,
+        "y": 760,
+        "wires": [
+            [
+                "fcb119c24e270edb"
+            ]
+        ]
+    },
+    {
+        "id": "628cb44b89e65663",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "WeatherHistorical",
+        "links": [
+            "c2ed04039a5d1d24"
+        ],
+        "x": 2695,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "c2ed04039a5d1d24",
+        "type": "link in",
+        "z": "545a844242b98494",
+        "name": "WeatherHistorical",
+        "links": [
+            "628cb44b89e65663",
+            "24b7bb7d2fe1df84"
+        ],
+        "x": 115,
+        "y": 1960,
+        "wires": [
+            [
+                "f46eccaee7946c5a"
+            ]
+        ]
+    },
+    {
+        "id": "24b7bb7d2fe1df84",
+        "type": "link out",
+        "z": "545a844242b98494",
+        "name": "WeatherHistorical",
+        "links": [
+            "c2ed04039a5d1d24"
+        ],
+        "x": 2555,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "890ade5accddc4a8",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "Populate Dropdown",
+        "func": "options = [];\n\nfor (let i = 0; i < msg.payload.length; i++){\n    nama = msg.payload[i].name;\n    id = msg.payload[i].id;\n    \n    options.push({\n        [nama] : id\n    });\n}\n\nmsg.options = options\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2420,
+        "y": 640,
+        "wires": [
+            [
+                "24b7bb7d2fe1df84"
+            ]
+        ]
+    },
+    {
+        "id": "c6d26ef3475035aa",
+        "type": "mysql",
+        "z": "545a844242b98494",
+        "mydb": "6432c7055e6da9da",
+        "name": "Access DB",
+        "x": 2240,
+        "y": 640,
+        "wires": [
+            [
+                "890ade5accddc4a8"
+            ]
+        ]
+    },
+    {
+        "id": "076f3801080463d0",
+        "type": "function",
+        "z": "545a844242b98494",
+        "name": "All Cities",
+        "func": "msg.topic = \"SELECT id, name FROM t_city;\"\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2080,
+        "y": 640,
+        "wires": [
+            [
+                "c6d26ef3475035aa"
+            ]
+        ]
+    },
+    {
+        "id": "b90fee98dd7a9d60",
+        "type": "mqtt out",
+        "z": "545a844242b98494",
+        "name": "",
+        "topic": "vr/weather-system/login-log",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "80666e2e2cac6810",
+        "x": 860,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "80666e2e2cac6810",
+        "type": "mqtt-broker",
+        "name": "HiveMQ Broker",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "tls": "",
+        "clientid": "",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "6432c7055e6da9da",
+        "type": "MySQLdatabase",
+        "name": "WeatherSystem DB",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "weathersystem",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "5f8399b2250daea4",
+        "type": "ui_group",
+        "name": "Selection",
+        "tab": "9fb139cfbc75acbe",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a054d1876a49dae5",
+        "type": "ui_group",
+        "name": "Chart",
+        "tab": "9fb139cfbc75acbe",
+        "order": 3,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "be2e36a4d31be2a2",
+        "type": "ui_group",
+        "name": "Chart2",
+        "tab": "9fb139cfbc75acbe",
+        "order": 3,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "30353b6cdaa16b64",
+        "type": "ui_group",
+        "name": "Kota 1",
+        "tab": "79584e26dcc7e971",
+        "order": 1,
+        "disp": false,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "4f77a9187b268839",
+        "type": "ui_group",
+        "name": "Kota 2",
+        "tab": "79584e26dcc7e971",
+        "order": 1,
+        "disp": false,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9fb139cfbc75acbe",
+        "type": "ui_tab",
+        "name": "Weather Historical",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "79584e26dcc7e971",
+        "type": "ui_tab",
+        "name": "Current Weather",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

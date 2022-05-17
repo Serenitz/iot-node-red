@@ -1,0 +1,215 @@
+{
+	"info": {
+		"_postman_id": "e4b1cb47-7bcd-4f42-b4fe-e9a30c53d717",
+		"name": "weather-systems",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set(\"Token\", jsonData[\"token\"]);\r",
+							"pm.collectionVariables.set(\"User\", jsonData[\"username\"]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "vincent",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "rey123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:1880/weather-system/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1880",
+					"path": [
+						"weather-system",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "dummy011",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "p*ssw0rd",
+							"type": "text"
+						},
+						{
+							"key": "confirmPassword",
+							"value": "p*ssw0rd",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:1880/weather-system/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1880",
+					"path": [
+						"weather-system",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change City",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"/*\r",
+							"var listKota = pm.environment.get(\"listKota\");\r",
+							"\r",
+							"if(!listKota){\r",
+							"    listKota = [\"Jakarta\", \"Tangerang\", \"Bogor\", \"\"];\r",
+							"}\r",
+							"\r",
+							"var kotaSkrg = listKota.shift();\r",
+							"\r",
+							"pm.environment.set(\"kotaNow\", kotaSkrg);\r",
+							"pm.environment.set(\"listKota\", listKota);\r",
+							"pm.collectionVariables.set(\"listKotaT\", listKota);\r",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"/*\r",
+							"function wait(){\r",
+							"}\r",
+							"\r",
+							"var listKota = pm.environment.get(\"listKota\");\r",
+							"\r",
+							"if(listKota && listKota.length > 0){\r",
+							"    setTimeout(wait, 600000);\r",
+							"    postman.setNextRequest(\"Update\");\r",
+							"}else{\r",
+							"    postman.setNextRequest(null);\r",
+							"}\r",
+							"*/"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "kota1",
+							"value": "Jakarta",
+							"type": "text"
+						},
+						{
+							"key": "kota2",
+							"value": "Bogor",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:1880/weather-system/change?token={{Token}}&user={{User}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "1880",
+					"path": [
+						"weather-system",
+						"change"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{Token}}"
+						},
+						{
+							"key": "user",
+							"value": "{{User}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "kotaNow",
+			"value": ""
+		},
+		{
+			"key": "listKotaT",
+			"value": ""
+		},
+		{
+			"key": "Token",
+			"value": ""
+		},
+		{
+			"key": "User",
+			"value": ""
+		}
+	]
+}
